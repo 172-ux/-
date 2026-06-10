@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>강민지 업무체크</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F8FA;
+    --card: #FFFFFF;
+    --primary: #3D6FD4;
+    --primary-light: #EEF3FF;
+    --accent: #FF6B35;
+    --success: #22A06B;
+    --success-light: #E6F7F1;
+    --weekend: #F3F4F6;
+    --text: #1A1D23;
+    --sub: #6B7280;
+    --border: #E5E7EB;
+    --yellow: #FFF8E1;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 16px 20px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(61,111,212,0.25);
+  }
+
+  header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+  header p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+
+  .tab-bar {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 60px;
+    z-index: 99;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sub);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 700;
+  }
+
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  .info-banner {
+    background: var(--primary-light);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--primary);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .info-banner .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  /* 날짜 선택 */
+  .date-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .date-selector label { font-size: 14px; font-weight: 600; color: var(--text); flex-shrink: 0; }
+  .date-selector input[type=date] {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: var(--text);
+    background: white;
+    font-family: inherit;
+  }
+
+  /* 수량 입력 */
+  .qty-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .qty-row label { font-size: 14px; font-weight: 600; flex-shrink: 0; }
+  .qty-input-wrap {
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    overflow: hidden;
+    flex: 1;
+    max-width: 200px;
+  }
+  .qty-btn {
+    width: 40px;
+    height: 44px;
+    background: var(--primary-light);
+    border: none;
+    font-size: 20px;
+    color: var(--primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .qty-btn:active { background: var(--primary); color: white; }
+  .qty-num {
+    flex: 1;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+    border: none;
+    outline: none;
+    padding: 0 4px;
+    color: var(--text);
+    width: 60px;
+  }
+
+  /* 체크박스 */
+  .check-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .check-item.checked { background: var(--success-light); border-color: var(--success); }
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+    background: white;
+  }
+  .check-item.checked .check-box { background: var(--success); border-color: var(--success); color: white; }
+  .check-label { font-size: 14px; font-weight: 500; }
+
+  .save-btn {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: -0.3px;
+    transition: opacity 0.15s;
+  }
+  .save-btn:active { opacity: 0.85; }
+  .save-btn:disabled { background: var(--border); color: var(--sub); }
+
+  /* 목록 */
+  .entry-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+  }
+  .entry-row:last-child { border-bottom: none; }
+  .entry-date { font-size: 13px; font-weight: 600; min-width: 48px; color: var(--text); }
+  .entry-day { font-size: 12px; color: var(--sub); min-width: 20px; }
+  .entry-qty {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary);
+    min-width: 50px;
+    text-align: right;
+  }
+  .entry-unit { font-size: 12px; color: var(--sub); }
+  .entry-checks { display: flex; gap: 4px; margin-left: auto; }
+  .badge {
+    font-size: 11px;
+    padding: 3px 7px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .badge-done { background: var(--success-light); color: var(--success); }
+  .badge-pending { background: #FEF9C3; color: #854D0E; }
+  .entry-del {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--sub);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .entry-del:active { background: #FEE2E2; color: #DC2626; border-color: #DC2626; }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0 0;
+    border-top: 2px solid var(--text);
+    margin-top: 4px;
+  }
+  .total-label { font-size: 14px; font-weight: 700; }
+  .total-val { font-size: 20px; font-weight: 800; color: var(--primary); }
+
+  /* 급여 계산 */
+  .salary-period {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .period-label { font-size: 13px; font-weight: 600; color: var(--sub); }
+  .period-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .period-tab {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--sub);
+    cursor: pointer;
+  }
+  .period-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+  .salary-card {
+    background: var(--yellow);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .salary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .salary-item { }
+  .salary-item-label { font-size: 12px; color: var(--sub); margin-bottom: 4px; }
+  .salary-item-val { font-size: 18px; font-weight: 800; color: var(--text); }
+  .salary-item-val.accent { color: var(--accent); }
+  .salary-item-val.success { color: var(--success); }
+  .salary-item-val.primary { color: var(--primary); }
+
+  .salary-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .salary-table th {
+    background: var(--bg);
+    padding: 8px 6px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--sub);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .salary-table td {
+    padding: 9px 6px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .salary-table tr:last-child td { border-bottom: none; font-weight: 800; background: var(--primary-light); }
+  .salary-table .num { font-weight: 700; color: var(--primary); }
+  .salary-table .won { font-size: 12px; color: var(--sub); }
+
+  .empty-state {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--sub);
+    font-size: 14px;
+  }
+  .empty-state .emoji { font-size: 36px; margin-bottom: 8px; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1A1D23;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .period-info {
+    font-size: 12px;
+    color: var(--sub);
+    margin-top: 6px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 강민지 업무체크</h1>
+  <p>상품수정 · 개당 200원 · 원천징수 3.3%</p>
+</header>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="showTab('input')">✏️ 입력</button>
+  <button class="tab" onclick="showTab('list')">📅 목록</button>
+  <button class="tab" onclick="showTab('salary')">💰 급여</button>
+</div>
+
+<!-- 입력 탭 -->
+<div id="tab-input" class="page active">
+  <div class="info-banner">
+    <span class="icon">💡</span>
+    <span>매일 작업 완료 후 수량을 입력하고 저장하세요.<br>주말(토·일)은 자동으로 처리됩니다.</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">날짜 선택</div>
+    <div class="date-selector">
+      <label>📅</label>
+      <input type="date" id="inputDate">
+    </div>
+    <div id="weekendWarn" style="display:none; color:#DC2626; font-size:13px; padding:8px 10px; background:#FEF2F2; border-radius:8px; margin-bottom:12px;">
+      ⚠️ 주말입니다. 입력이 필요한 경우 저장 가능합니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">상품수정 수량</div>
+    <div class="qty-row">
+      <label>📦 수량</label>
+      <div class="qty-input-wrap">
+        <button class="qty-btn" onclick="changeQty(-10)">−</button>
+        <input class="qty-num" type="number" id="qtyInput" value="0" min="0">
+        <button class="qty-btn" onclick="changeQty(10)">+</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:16px;">
+      <button onclick="setQty(50)" style="flex:1; padding:7px; border:1px solid var(--border); border-radius:8px; background:white; font-size:13px; cursor:pointer;">50</button>
+      <button onclick="setQty(100)" style="flex:1; padding:7px; border:1px solid var(--border); border-radius:8px; background:white; font-size:13px; cursor:pointer;">100</button>
+      <button onclick="setQty(150)" style="flex:1; padding:7px; border:1px solid var(--border); border-radius:8px; background:white; font-size:13px; cursor:pointer;">150</button>
+      <button onclick="setQty(200)" style="flex:1; padding:7px; border:1px solid var(--border); border-radius:8px; background:white; font-size:13px; cursor:pointer;">200</button>
+    </div>
+    <div style="background:var(--primary-light); border-radius:8px; padding:10px 12px; font-size:13px; color:var(--primary); margin-bottom:16px;">
+      예상 세전: <strong id="previewAmt">0원</strong> → 실지급: <strong id="previewNet">0원</strong>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">확인 체크</div>
+    <div class="check-group">
+      <div class="check-item" id="check-done" onclick="toggleCheck('done')">
+        <div class="check-box" id="box-done"></div>
+        <span class="check-label">✅ 작업완료 체크</span>
+      </div>
+      <div class="check-item" id="check-manager" onclick="toggleCheck('manager')">
+        <div class="check-box" id="box-manager"></div>
+        <span class="check-label">👤 담당자 확인 (강민지)</span>
+      </div>
+      <div class="check-item" id="check-boss" onclick="toggleCheck('boss')">
+        <div class="check-box" id="box-boss"></div>
+        <span class="check-label">👔 대표 확인</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">비고</div>
+    <textarea id="noteInput" placeholder="메모 입력 (선택사항)" style="width:100%; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:14px; font-family:inherit; resize:none; height:70px; color:var(--text);"></textarea>
+  </div>
+
+  <button class="save-btn" onclick="saveEntry()">💾 저장하기</button>
+</div>
+
+<!-- 목록 탭 -->
+<div id="tab-list" class="page">
+  <div class="card">
+    <div class="card-title">기간 선택</div>
+    <div id="periodTabsList" class="period-tabs" style="margin-bottom:0;"></div>
+  </div>
+
+  <div class="card" id="listCard">
+    <div class="empty-state">
+      <div class="emoji">📭</div>
+      <div>아직 입력된 데이터가 없어요</div>
+    </div>
+  </div>
+</div>
+
+<!-- 급여 탭 -->
+<div id="tab-salary" class="page">
+  <div class="card">
+    <div class="card-title">조회 기간</div>
+    <div id="periodTabsSalary" class="period-tabs" style="margin-bottom:0;"></div>
+  </div>
+
+  <div id="salaryContent">
+    <div class="card">
+      <div class="empty-state">
+        <div class="emoji">💸</div>
+        <div>기간을 선택하면 급여가 계산됩니다</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── 데이터 저장 (localStorage) ─────────────────────────────
+const KEY = 'kangminji_entries';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
+}
+function saveData(data) {
+  localStorage.setItem(KEY, JSON.stringify(data));
+}
+
+// ─── 급여 기간 정의 ─────────────────────────────────────────
+const PERIODS = [
+  { label: '6월', key: '6월', start: '2025-06-09', end: '2025-07-08' },
+  { label: '7월', key: '7월', start: '2025-07-09', end: '2025-08-08' },
+  { label: '8월', key: '8월', start: '2025-08-09', end: '2025-09-08' },
+  { label: '9월', key: '9월', start: '2025-09-09', end: '2025-10-08' },
+  { label: '10월', key: '10월', start: '2025-10-09', end: '2025-11-08' },
+  { label: '11월', key: '11월', start: '2025-11-09', end: '2025-12-08' },
+  { label: '12월', key: '12월', start: '2025-12-09', end: '2026-01-08' },
+];
+
+const UNIT = 200;
+const TAX_RATE = 0.033;
+
+function getPeriodForDate(dateStr) {
+  return PERIODS.find(p => dateStr >= p.start && dateStr <= p.end);
+}
+
+// ─── 탭 ─────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'list') renderList();
+  if (name === 'salary') renderSalary();
+}
+
+// ─── 날짜 초기화 ─────────────────────────────────────────────
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getDayName(dateStr) {
+  const days = ['일','월','화','수','목','금','토'];
+  return days[new Date(dateStr).getDay()];
+}
+function isWeekend(dateStr) {
+  const d = new Date(dateStr).getDay();
+  return d === 0 || d === 6;
+}
+
+const dateInput = document.getElementById('inputDate');
+dateInput.value = today();
+dateInput.addEventListener('change', () => {
+  document.getElementById('weekendWarn').style.display = isWeekend(dateInput.value) ? 'block' : 'none';
+  updatePreview();
+});
+
+// ─── 수량 ───────────────────────────────────────────────────
+const qtyInput = document.getElementById('qtyInput');
+qtyInput.addEventListener('input', updatePreview);
+
+function changeQty(delta) {
+  const v = Math.max(0, (parseInt(qtyInput.value) || 0) + delta);
+  qtyInput.value = v;
+  updatePreview();
+}
+function setQty(v) { qtyInput.value = v; updatePreview(); }
+
+function updatePreview() {
+  const qty = parseInt(qtyInput.value) || 0;
+  const gross = qty * UNIT;
+  const tax = Math.floor(gross * TAX_RATE / 10) * 10;
+  const net = gross - tax;
+  document.getElementById('previewAmt').textContent = gross.toLocaleString() + '원';
+  document.getElementById('previewNet').textContent = net.toLocaleString() + '원';
+}
+updatePreview();
+
+// ─── 체크박스 ────────────────────────────────────────────────
+const checks = { done: false, manager: false, boss: false };
+function toggleCheck(key) {
+  checks[key] = !checks[key];
+  const item = document.getElementById('check-' + key);
+  const box = document.getElementById('box-' + key);
+  item.classList.toggle('checked', checks[key]);
+  box.textContent = checks[key] ? '✓' : '';
+}
+
+// ─── 저장 ───────────────────────────────────────────────────
+function saveEntry() {
+  const dateStr = dateInput.value;
+  const qty = parseInt(qtyInput.value) || 0;
+  const note = document.getElementById('noteInput').value.trim();
+
+  const data = loadData();
+  data[dateStr] = {
+    qty,
+    done: checks.done,
+    manager: checks.manager,
+    boss: checks.boss,
+    note,
+    savedAt: new Date().toISOString()
+  };
+  saveData(data);
+
+  showToast('✅ ' + dateStr + ' 저장 완료! (' + qty + '개)');
+
+  // 다음날로
+  const next = new Date(dateStr);
+  next.setDate(next.getDate() + 1);
+  dateInput.value = next.toISOString().slice(0, 10);
+  qtyInput.value = 0;
+  checks.done = checks.manager = checks.boss = false;
+  ['done','manager','boss'].forEach(k => {
+    document.getElementById('check-'+k).classList.remove('checked');
+    document.getElementById('box-'+k).textContent = '';
+  });
+  document.getElementById('noteInput').value = '';
+  document.getElementById('weekendWarn').style.display = isWeekend(dateInput.value) ? 'block' : 'none';
+  updatePreview();
+}
+
+// ─── 목록 렌더링 ─────────────────────────────────────────────
+let listPeriod = PERIODS[0].key;
+
+function renderPeriodTabs(containerId, activePeriod, onClickFn) {
+  const wrap = document.getElementById(containerId);
+  wrap.innerHTML = PERIODS.map(p =>
+    `<button class="period-tab ${p.key === activePeriod ? 'active' : ''}" onclick="${onClickFn}('${p.key}')">${p.label}</button>`
+  ).join('');
+}
+
+function setListPeriod(key) {
+  listPeriod = key;
+  renderPeriodTabs('periodTabsList', listPeriod, 'setListPeriod');
+  renderList();
+}
+
+function renderList() {
+  renderPeriodTabs('periodTabsList', listPeriod, 'setListPeriod');
+  const period = PERIODS.find(p => p.key === listPeriod);
+  const data = loadData();
+  const card = document.getElementById('listCard');
+
+  // 해당 기간 날짜 목록
+  const entries = [];
+  let d = new Date(period.start);
+  const end = new Date(period.end);
+  while (d <= end) {
+    const ds = d.toISOString().slice(0, 10);
+    if (data[ds]) entries.push({ date: ds, ...data[ds] });
+    d.setDate(d.getDate() + 1);
+  }
+
+  if (!entries.length) {
+    card.innerHTML = `<div class="empty-state"><div class="emoji">📭</div><div>아직 입력된 데이터가 없어요</div></div>`;
+    return;
+  }
+
+  const totalQty = entries.reduce((s, e) => s + e.qty, 0);
+  const rows = entries.map(e =>
+    `<div class="entry-row">
+      <span class="entry-date">${e.date.slice(5)}</span>
+      <span class="entry-day">${getDayName(e.date)}</span>
+      <span class="entry-qty">${e.qty.toLocaleString()}</span>
+      <span class="entry-unit">개</span>
+      <div class="entry-checks">
+        <span class="badge ${e.done ? 'badge-done' : 'badge-pending'}">${e.done ? '완료' : '미완'}</span>
+        ${e.boss ? '<span class="badge badge-done">대표✓</span>' : ''}
+      </div>
+      <button class="entry-del" onclick="deleteEntry('${e.date}')">✕</button>
+    </div>`
+  ).join('');
+
+  card.innerHTML = `
+    <div class="card-title">${period.label} (${period.start.slice(5)} ~ ${period.end.slice(5)})</div>
+    ${rows}
+    <div class="total-row">
+      <span class="total-label">합계</span>
+      <span class="total-val">${totalQty.toLocaleString()}개</span>
+    </div>
+  `;
+}
+
+function deleteEntry(dateStr) {
+  if (!confirm(dateStr + ' 데이터를 삭제할까요?')) return;
+  const data = loadData();
+  delete data[dateStr];
+  saveData(data);
+  renderList();
+  showToast('🗑️ 삭제했어요');
+}
+
+// ─── 급여 계산 ───────────────────────────────────────────────
+let salaryPeriod = PERIODS[0].key;
+
+function setSalaryPeriod(key) {
+  salaryPeriod = key;
+  renderPeriodTabs('periodTabsSalary', salaryPeriod, 'setSalaryPeriod');
+  renderSalary();
+}
+
+function renderSalary() {
+  renderPeriodTabs('periodTabsSalary', salaryPeriod, 'setSalaryPeriod');
+  const period = PERIODS.find(p => p.key === salaryPeriod);
+  const data = loadData();
+
+  let totalQty = 0;
+  let d = new Date(period.start);
+  const end = new Date(period.end);
+  while (d <= end) {
+    const ds = d.toISOString().slice(0, 10);
+    if (data[ds]) totalQty += data[ds].qty;
+    d.setDate(d.getDate() + 1);
+  }
+
+  const gross = totalQty * UNIT;
+  const tax = Math.floor(gross * TAX_RATE / 10) * 10;
+  const net = gross - tax;
+
+  // 전체 합계
+  let allRows = PERIODS.map(p => {
+    let pQty = 0;
+    let pd = new Date(p.start);
+    const pe = new Date(p.end);
+    while (pd <= pe) {
+      const ds = pd.toISOString().slice(0, 10);
+      if (data[ds]) pQty += data[ds].qty;
+      pd.setDate(pd.getDate() + 1);
+    }
+    const pg = pQty * UNIT;
+    const pt = Math.floor(pg * TAX_RATE / 10) * 10;
+    const pn = pg - pt;
+    return { label: p.label, qty: pQty, gross: pg, tax: pt, net: pn };
+  });
+  const totals = allRows.reduce((acc, r) => ({
+    qty: acc.qty + r.qty, gross: acc.gross + r.gross,
+    tax: acc.tax + r.tax, net: acc.net + r.net
+  }), { qty: 0, gross: 0, tax: 0, net: 0 });
+
+  document.getElementById('salaryContent').innerHTML = `
+    <div class="salary-card">
+      <div style="font-size:14px; font-weight:700; color:var(--text); margin-bottom:12px;">${period.label} 급여 (${period.start.slice(5)} ~ ${period.end.slice(5)})</div>
+      <div class="salary-grid">
+        <div class="salary-item">
+          <div class="salary-item-label">총 수정개수</div>
+          <div class="salary-item-val primary">${totalQty.toLocaleString()}개</div>
+        </div>
+        <div class="salary-item">
+          <div class="salary-item-label">세전 급여</div>
+          <div class="salary-item-val">${gross.toLocaleString()}원</div>
+        </div>
+        <div class="salary-item">
+          <div class="salary-item-label">원천징수 (3.3%)</div>
+          <div class="salary-item-val accent">-${tax.toLocaleString()}원</div>
+        </div>
+        <div class="salary-item">
+          <div class="salary-item-label">💵 실지급액</div>
+          <div class="salary-item-val success">${net.toLocaleString()}원</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">전체 급여 현황</div>
+      <table class="salary-table">
+        <tr>
+          <th>기간</th><th>개수</th><th>세전</th><th>공제</th><th>실지급</th>
+        </tr>
+        ${allRows.map(r => `
+          <tr>
+            <td>${r.label}</td>
+            <td class="num">${r.qty.toLocaleString()}</td>
+            <td>${r.gross.toLocaleString()}<span class="won">원</span></td>
+            <td style="color:var(--accent)">-${r.tax.toLocaleString()}</td>
+            <td class="num">${r.net.toLocaleString()}</td>
+          </tr>`).join('')}
+        <tr>
+          <td>합계</td>
+          <td>${totals.qty.toLocaleString()}</td>
+          <td>${totals.gross.toLocaleString()}</td>
+          <td>-${totals.tax.toLocaleString()}</td>
+          <td>${totals.net.toLocaleString()}</td>
+        </tr>
+      </table>
+    </div>
+  `;
+}
+
+// ─── 토스트 ─────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// 초기화
+renderPeriodTabs('periodTabsList', listPeriod, 'setListPeriod');
+renderPeriodTabs('periodTabsSalary', salaryPeriod, 'setSalaryPeriod');
+</script>
+</body>
+</html>
